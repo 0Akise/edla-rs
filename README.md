@@ -2,7 +2,9 @@
 ### *A Forgotten Method, Alternative to Backpropagation - Resurrected from 1999*
 
 > **"…十分な中間ユニットがあればED法ではXORを5ステップで学習できることが分かります。"**
+>
 > **"...Here, we can see that ED can solve XOR in just 5 steps, if there are enough hidden layers"**
+>
 > *— Isamu Kaneko, 1999 in his website after experiments*
 
 
