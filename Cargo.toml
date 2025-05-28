@@ -1,0 +1,15 @@
+[package]
+name = "edla-rs"
+version = "0.1.0"
+edition = "2024"
+authors = ["0Akise <0akise.ruze@gmail.com>"]
+description = "Revival of Isamu Kaneko's 1999 Neural network learning algorithm, alternative to Backpropagation."
+license = "Apache-2.0"
+
+
+[lib]
+name = "edla_rs"
+
+[dependencies]
+rand = "*"
+serde = { version = "1.0", features = ["derive"] }
