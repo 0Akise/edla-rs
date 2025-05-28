@@ -35,9 +35,7 @@ void init_network(int init_input, int init_output, int init_hidden, int init_hid
     int c_neuron;     // Current (target) neuron index
     int s_neuron;     // Source neuron index
 
-    /* =================================================================
-     * PHASE 1: NETWORK ARCHITECTURE SETUP
-     * ================================================================= */
+    /* 1: NETWORK ARCHITECTURE SETUP */
 
     // Store network dimensions
     size_input = init_input;                       // Input neurons (already doubled)
@@ -48,73 +46,52 @@ void init_network(int init_input, int init_output, int init_hidden, int init_hid
 
     printf("Initializing ED network: %d inputs, %d hidden (%d+%d), %d outputs\n", size_input, size_hidden, init_hidden, init_hidden2, size_output);
 
-    /* =================================================================
-     * PHASE 2: NEURON TYPE ASSIGNMENT (EXCITATORY/INHIBITORY)
-     *
-     * Each neuron is assigned as either excitatory (+1) or inhibitory (-1) using an alternating pattern.
-     * This pattern determines how learning occurs.
-     * ================================================================= */
+    /* 2: NEURON TYPE ASSIGNMENT (EXCITATORY/INHIBITORY) */
+    // Each neuron is assigned as either excitatory (+1) or inhibitory (-1) using an alternating pattern.
+    // This pattern determines how learning occurs. 
 
     // Initialize for each output network (usually just one)
     for (out_network = 0; out_network < size_output; out_network++) {
-        /* --------------------------------------------------------
-         * Create alternating excitatory/inhibitory pattern:
-         * Index 0: +1 (bias+)     Index 1: -1 (bias-)
-         * Index 2: +1 (input1+)   Index 3: -1 (input1-)
-         * Index 4: +1 (input2+)   Index 5: -1 (input2-)
-         * ...and so on
-         * -------------------------------------------------------- */
+        // Create alternating excitatory/inhibitory pattern:
+        // Index 0: +1 (bias+)     Index 1: -1 (bias-)
+        // Index 2: +1 (input1+)   Index 3: -1 (input1-)
+        // Index 4: +1 (input2+)   Index 5: -1 (input2-)
+        // ...and so on
         for (c_neuron = 0; c_neuron <= total_neurons + 1; c_neuron++) {
             // Formula: ((index + 1) % 2) * 2 - 1 creates +1, -1, +1, -1...
             weights_oscillating[c_neuron] = ((c_neuron + 1) % 2) * 2 - 1;
         }
 
-        /* --------------------------------------------------------
-         * SPECIAL CASE: Output neuron is always excitatory
-         * This ensures consistent output behavior regardless of
-         * the alternating pattern
-         * -------------------------------------------------------- */
+        // SPECIAL CASE: Output neuron is always excitatory
+        // This ensures consistent output behavior regardless of
+        // the alternating pattern
         weights_oscillating[size_input + 2] = 1;  // First hidden/output is always +1
 
-        printf("Neuron types assigned - alternating +/- pattern with output=excitatory\n");
-
-        /* =================================================================
-         * PHASE 3: WEIGHT INITIALIZATION WITH ED CONSTRAINTS
-         * ================================================================= */
+        /* 3: WEIGHT INITIALIZATION WITH ED CONSTRAINTS */
 
         // Initialize weights for all possible connections
         for (c_neuron = size_input + 2; c_neuron <= total_neurons + 1; c_neuron++) {
             for (s_neuron = 0; s_neuron <= total_neurons + 1; s_neuron++) {
-                /* --------------------------------------------------------
-                 * Bias/Threshold Connections (indices 0-1)
-                 * These provide bias inputs to neurons
-                 * -------------------------------------------------------- */
+                // Bias/Threshold Connections (indices 0-1)
+                // These provide bias inputs to neurons
                 if (s_neuron < 2) {
                     weights[out_network][c_neuron][s_neuron] = init_range_threshold * random();
                 }
 
-                /* --------------------------------------------------------
-                 * Regular Connections (indices > 1)
-                 * Standard neuron-to-neuron connections
-                 * -------------------------------------------------------- */
+                // Regular Connections (indices > 1)
+                // Standard neuron-to-neuron connections
                 if (s_neuron > 1) {
                     weights[out_network][c_neuron][s_neuron] = init_range_weight * random();
                 }
 
-                /* --------------------------------------------------------
-                 * Second Hidden Layer Input Blocking
-                 * Prevents second hidden layer from connecting directly to inputs
-                 * This creates proper hierarchical processing
-                 * -------------------------------------------------------- */
+                // Second Hidden Layer Input Blocking
+                // Prevents second hidden layer from connecting directly to inputs - This creates proper hierarchical processing
                 if (c_neuron > total_neurons + 1 - size_hidden2 && s_neuron < size_input + 2 && s_neuron >= 2) {
                     weights[out_network][c_neuron][s_neuron] = 0;
                 }
 
-                /* --------------------------------------------------------
-                 * Loop Cutting (config_flags[6])
-                 * Prevents certain recurrent connections between hidden neurons
-                 * This maintains feedforward structure when enabled
-                 * -------------------------------------------------------- */
+                // Loop Cutting (config_flags[6])
+                // Prevents certain recurrent connections between hidden neurons - This maintains feedforward structure when enabled
                 if (config_flags[6] == 1 && c_neuron != s_neuron && c_neuron > size_input + 2 && s_neuron > size_input + 1) {
                     weights[out_network][c_neuron][s_neuron] = 0;
                 }
@@ -123,28 +100,20 @@ void init_network(int init_input, int init_output, int init_hidden, int init_hid
                     weights[out_network][c_neuron][s_neuron] = 0;
                 }
 
-                /* --------------------------------------------------------
-                 * Multi-layer Input Blocking (config_flags[7])
-                 * Controls direct input-to-output connections in multi-layer networks
-                 * Forces information to flow through hidden layers
-                 * -------------------------------------------------------- */
+                // Multi-layer Input Blocking (config_flags[7])
+                // Controls direct input-to-output connections in multi-layer networks - Forces information to flow through hidden layers
                 if (config_flags[7] == 1 && s_neuron >= 2 && s_neuron < size_input + 2 && c_neuron >= size_input + 2 && c_neuron < size_input + 3) {
                     weights[out_network][c_neuron][s_neuron] = 0;
                 }
 
-                /* --------------------------------------------------------
-                 * Second Hidden Layer Internal Connections
-                 * Allows connections within the second hidden layer
-                 * -------------------------------------------------------- */
+                // Second Hidden Layer Internal Connections
+                // Allows connections within the second hidden layer
                 if (c_neuron > total_neurons + 1 - size_hidden2 && s_neuron >= size_input + 3) {
                     weights[out_network][c_neuron][s_neuron] = init_range_weight * random();
                 }
 
-                /* --------------------------------------------------------
-                 * Self-Loop Control (config_flags[3])
-                 * Determines whether neurons can connect to themselves
-                 * Self-loops can create memory effects in the network
-                 * -------------------------------------------------------- */
+                // Self-Loop Control (config_flags[3])
+                // Determines whether neurons can connect to themselves - Self-loops can create memory effects in the network
                 if (c_neuron == s_neuron) {
                     if (config_flags[3] == 1) {
                         weights[out_network][c_neuron][s_neuron] = 0;  // No self-loops
@@ -153,39 +122,29 @@ void init_network(int init_input, int init_output, int init_hidden, int init_hid
                     }
                 }
 
-                /* --------------------------------------------------------
-                 * Inhibitory Input Control (config_flags[11])
-                 * Controls whether inhibitory inputs are used
-                 * When disabled, removes connections from inhibitory input neurons
-                 * -------------------------------------------------------- */
+                // Inhibitory Input Control (config_flags[11])
+                // Controls whether inhibitory inputs are used - When disabled, removes connections from inhibitory input neurons
                 if (config_flags[11] == 0 && s_neuron < size_input + 2 && (s_neuron % 2) == 1) {
                     weights[out_network][c_neuron][s_neuron] = 0;
                 }
 
-                /* =============================================================
-                 * Each weight is multiplied by the product of source and target neuron types (+1 or -1).
-                 * This creates the constraint pattern:
-                 * Excitatory → Excitatory: (+1) × (+1) = +1 (positive weight)
-                 * Inhibitory → Inhibitory: (-1) × (-1) = +1 (positive weight)
-                 * Excitatory → Inhibitory: (+1) × (-1) = -1 (negative weight)
-                 * Inhibitory → Excitatory: (-1) × (+1) = -1 (negative weight)
-                 * ============================================================= */
+                // Each weight is multiplied by the product of source and target neuron types (+1 or -1) - This creates the constraint pattern:
+                // Excitatory → Excitatory: (+1) × (+1) = +1 (positive weight)
+                // Inhibitory → Inhibitory: (-1) × (-1) = +1 (positive weight)
+                // Excitatory → Inhibitory: (+1) × (-1) = -1 (negative weight)
+                // Inhibitory → Excitatory: (-1) × (+1) = -1 (negative weight)
                 weights[out_network][c_neuron][s_neuron] *= weights_oscillating[s_neuron] * weights_oscillating[c_neuron];
             }
         }
 
-        /* --------------------------------------------------------
-         * Initialize bias inputs for this output network
-         * Both positive and negative bias neurons get same value
-         * -------------------------------------------------------- */
+        // Initialize bias inputs for this output network
+        // Both positive and negative bias neurons get same value
         neuron_input[out_network][0] = bias;  // Positive bias
         neuron_input[out_network][1] = bias;  // Negative bias
     }
 
-    /* =================================================================
-     * PHASE 4: RESET LEARNING COUNTERS
-     * ================================================================= */
-
+    /* 4: RESET LEARNING COUNTERS */
+    
     error_count = 0;  // Reset error pattern counter
     error_total = 0;  // Reset total accumulated error
 }

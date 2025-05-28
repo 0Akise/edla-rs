@@ -51,7 +51,7 @@ void calculate_weight() {
                 // SKIP DISABLED CONNECTIONS
                 // Only process connections that were initialized with non-zero weights (respects architectural constraints)
                 if (weights[out_network][c_neuron][connection] != 0) {
-                    // PHASE 1: CALCULATE BASE WEIGHT CHANGE MAGNITUDE
+                    // 1: CALCULATE BASE WEIGHT CHANGE MAGNITUDE
                     // This part is similar to standard neural networks:
                     // - Learning rate controls update size
                     // - Input activation provides signal strength
@@ -62,7 +62,7 @@ void calculate_weight() {
                     delta *= fabs(neuron_output[out_network][c_neuron]);
                     delta *= (1 - fabs(neuron_output[out_network][c_neuron]));
 
-                    // PHASE 2: APPLY ERROR DIFFUSION LEARNING RULE
+                    // 2: APPLY ERROR DIFFUSION LEARNING RULE
                     // Instead of BP'ed gradients, ED uses broadcasted error signals combined with neuron type information to determine update direction.
                     if (config_flags[10] == 1) {
                         // MODE 1: BIDIRECTIONAL ERROR APPLICATION

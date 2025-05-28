@@ -140,7 +140,7 @@ int write_weight_neuron(int loop, int write_mode, int pattern_count) {
 
     // Add learning status indicator
     if (error_count == 0) {
-        printf(" ✓ PERFECT!");
+        printf(" ✓ PERFECT");
     } else if (error_count <= pattern_count * 0.1) {
         printf(" ✓ Excellent");
     } else if (error_count <= pattern_count * 0.3) {

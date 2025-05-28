@@ -85,7 +85,7 @@ void calculate_output(double* input_pattern_current) {
 
         printf("Input distributed to %d excitatory/inhibitory pairs\n", size_input / 2);
 
-        //  2: HIDDEN LAYER INITIALIZATION
+        // 2: HIDDEN LAYER INITIALIZATION
         // If loop cutting is enabled, initialize hidden neurons to zero.
         // This ensures clean processing without residual activations from previous patterns.
         if (config_flags[6]) {  // Loop cutting flag (config_flags[6])
@@ -95,7 +95,7 @@ void calculate_output(double* input_pattern_current) {
             printf("Hidden layer initialized to zero (loop cutting enabled)\n");
         }
 
-        //  3: RECURRENT PROCESSING TIMESTEPS
+        // 3: RECURRENT PROCESSING TIMESTEPS
         // Instead of single-pass computation, the network processes over multiple timesteps, allowing:
         // - Feedback effects between layers
         // - Network stabilization
@@ -107,7 +107,7 @@ void calculate_output(double* input_pattern_current) {
         for (timestep = 1; timestep <= timesteps; timestep++) {
             printf("Timestep %d/%d: Computing hidden/output layer activations\n", timestep, timesteps);
 
-            // STEP 3A: COMPUTE ACTIVATIONS FOR ALL HIDDEN/OUTPUT NEURONS
+            // 3A: COMPUTE ACTIVATIONS FOR ALL HIDDEN/OUTPUT NEURONS
             // For each neuron beyond the input layer, compute its activation by summing all weighted inputs and applying the sigmoid function.
             for (c_neuron = size_input + 2; c_neuron <= total_neurons + 1; c_neuron++) {
                 weighted_sum = 0;
@@ -121,7 +121,7 @@ void calculate_output(double* input_pattern_current) {
                 neuron_output[out_network][c_neuron] = sigmoid(weighted_sum);
             }
 
-            // STEP 3B: FEEDBACK FOR NEXT TIMESTEP
+            // 3B: FEEDBACK FOR NEXT TIMESTEP
             // Copy current outputs back to inputs for next timestep.
             // This creates the recurrent processing that allows the network to iterate toward a stable solution.
             // This feedback mechanism is crucial for complex problems where single-pass processing isn't sufficient.
@@ -138,6 +138,6 @@ void calculate_output(double* input_pattern_current) {
     // - All neuron activations have been computed
     // - Network has processed through recurrent timesteps
     // - Outputs are ready for error calculation
-    // - No gradients stored (unlike backpropagation!)
+    // - No gradients stored (unlike BP)
     // Unliked BP, we don't need to track computational graphs or store intermediate gradients.
 }

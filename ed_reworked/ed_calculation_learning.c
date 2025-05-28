@@ -145,12 +145,6 @@ void calculate_learning(double* target_pattern_current) {
     // 2. Neuron types → Determine individual learning directions
     // 3. Amplification → Controls hidden layer learning strength
     // 4. Binary channels → Simplifies complex gradient computations
-    //
-    // This is why ED can:
-    // - Solve XOR in ~5 steps (vs 100+ for backprop)
-    // - Handle deep networks without vanishing gradients
-    // - Process all layers in parallel
-    // - Work with minimal parameter tuning
 
     printf("Error Diffusion complete.\n");
 }
